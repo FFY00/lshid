@@ -4,6 +4,7 @@ import os
 
 from typing import Dict, Iterator
 
+import hid_parser
 import ioctl.hidraw
 
 
@@ -58,5 +59,5 @@ class DeviceHolder():
             print(f'Device {key}: ID {vid:04x}:{pid:04x} {hidraw.name}')
             if verbose:
                 print('Report Descriptor:')
-                print(hidraw.report_descriptor)
+                hid_parser.ReportDescriptor(hidraw.report_descriptor).print(level=1)
             first = False
