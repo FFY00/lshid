@@ -7,7 +7,7 @@ from typing import Dict, Iterator
 import ioctl.hidraw
 
 
-__version__ = '0.1'
+__version__ = '0.1.0'
 
 
 class DeviceHolder():
