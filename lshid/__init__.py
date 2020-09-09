@@ -54,9 +54,9 @@ class DeviceHolder():
         for key, hidraw in self.devices.items():
             bus, vid, pid = hidraw.info
             if verbose and not first:
-                first = False
                 print()
             print(f'Device {key}: ID {vid:04x}:{pid:04x} {hidraw.name}')
             if verbose:
                 print('Report Descriptor:')
                 print(hidraw.report_descriptor)
+            first = False
