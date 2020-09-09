@@ -3,62 +3,11 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
-import os
 import sys
 
-from typing import Dict, Iterator, List, Optional
-
-import ioctl.hidraw
-import parse
+from typing import List, Optional
 
 import lshid
-
-
-class DeviceHolder():
-    def __init__(self) -> None:
-        self.devices: Dict[str, ioctl.hidraw.Hidraw] = {}
-
-    def iterate_devices(self) -> Iterator[str]:
-        for fname in os.listdir('/dev/'):
-            if fname.startswith('hidraw'):
-                yield fname
-
-    def add_device(self, path: str) -> None:
-        if os.path.exists(path):
-            try:
-                self.devices[path] = ioctl.hidraw.Hidraw(path)
-            except IOError as e:
-                print(f"can't open '{path}': {str(e)}", file=sys.stderr)
-
-    def filter_devices(self, hid_info: str) -> None:
-        bus_pattern = parse.compile('{bus:d}:{vid:x}:{pid:x}')
-        sep_pattern = parse.compile(':{vid:x}:{pid:x}')
-        dev_pattern = parse.compile('{vid:x}:{pid:x}')
-
-        for key, hidraw in self.devices.copy().items():
-            bus, vid, pid = hidraw.info
-            for pattern in [bus_pattern, sep_pattern, dev_pattern]:
-                keys = pattern.parse(hid_info)
-                if keys:
-                    if (
-                        'bus' in keys and bus != keys['bus'] or
-                        vid != keys['vid'] or
-                        pid != keys['pid']
-                    ):
-                        del self.devices[key]
-                    break
-
-    def print_devices(self, verbose: bool = False) -> None:
-        first = True
-        for key, hidraw in self.devices.items():
-            bus, vid, pid = hidraw.info
-            if verbose and not first:
-                first = False
-                print()
-            print(f'Device {key}: ID {vid:04x}:{pid:04x} {hidraw.name}')
-            if verbose:
-                print('Report Descriptor:')
-                print(hidraw.report_descriptor)
 
 
 def main_parser() -> argparse.ArgumentParser:
@@ -92,7 +41,7 @@ def main_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(cli_args: List[str], prog: Optional[str] = None) -> None:
+def lshid_cmd(cli_args: List[str], prog: Optional[str] = None) -> None:
     parser = main_parser()
     if prog:
         parser.prog = prog
@@ -102,15 +51,18 @@ def main(cli_args: List[str], prog: Optional[str] = None) -> None:
         print(f'lshid {lshid.__version__}')
         return
 
-    main = DeviceHolder()
+    main = lshid.DeviceHolder()
 
     if args.devnum is not None:
         main.add_device(f'/dev/hidraw{args.devnum}')
     elif args.file is not None:
         main.add_device(args.file)
     else:
-        for device in main.get_devices():
-            main.add_device(f'/dev/{device}')
+        for device in main.iterate_devices():
+            try:
+                main.add_device(f'/dev/{device}')
+            except RuntimeError as e:
+                print(str(e), file=sys.stderr)
 
         if args.hid_info:
             main.filter_devices(args.hid_info)
@@ -119,6 +71,14 @@ def main(cli_args: List[str], prog: Optional[str] = None) -> None:
         exit(1)
 
     main.print_devices(args.verbose)
+
+
+def main(cli_args: List[str], prog: Optional[str] = None) -> None:
+    try:
+        lshid_cmd(cli_args, prog)
+    except Exception as e:
+        print(str(e), file=sys.stderr)
+        exit(1)
 
 
 def entrypoint() -> None:
