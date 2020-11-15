@@ -1,5 +1,7 @@
 # lshid
 
+[![PyPI version](https://badge.fury.io/py/lshid.svg)](https://pypi.org/project/lshid/)
+
 Like lsusb, but for HID devices.
 
 ```
