@@ -8,7 +8,7 @@ import hid_parser
 import ioctl.hidraw
 
 
-__version__ = '0.2.1'
+__version__ = '0.2.2'
 
 
 class DeviceHolder():
