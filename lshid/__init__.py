@@ -56,7 +56,7 @@ class DeviceHolder():
             bus, vid, pid = hidraw.info
             if verbose and not first:
                 print()
-            print(f'Device {key}: ID {vid:04x}:{pid:04x} {hidraw.name}')
+            print(f'Device {key}: BUS {bus:03} ID {vid:04x}:{pid:04x} {hidraw.name}')
             if verbose:
                 print('Report Descriptor:')
                 hid_parser.ReportDescriptor(hidraw.report_descriptor).print(level=1)
