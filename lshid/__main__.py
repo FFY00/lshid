@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 
 import argparse
-import os
 import sys
 import traceback
 import warnings
@@ -84,9 +83,7 @@ def main(cli_args: List[str], prog: Optional[str] = None) -> None:
     try:
         lshid_cmd(cli_args, prog)
     except Exception as e:
-        if 'LSHID_DEBUG' in os.environ:
-            print('\n', traceback.format_exc(), file=sys.stderr)
-        print('ERROR ' + str(e).strip('\'" '), file=sys.stderr)
+        print(f'\n{traceback.format_exc()}\nERROR ' + str(e).strip('\'" '), file=sys.stderr)
         exit(1)
 
 
