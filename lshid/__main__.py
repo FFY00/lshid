@@ -6,8 +6,11 @@ import argparse
 import os
 import sys
 import traceback
+import warnings
 
 from typing import List, Optional
+
+import hid_parser
 
 import lshid
 
@@ -76,6 +79,8 @@ def lshid_cmd(cli_args: List[str], prog: Optional[str] = None) -> None:
 
 
 def main(cli_args: List[str], prog: Optional[str] = None) -> None:
+    warnings.filterwarnings('ignore', category=hid_parser.HIDComplianceWarning)
+
     try:
         lshid_cmd(cli_args, prog)
     except Exception as e:
